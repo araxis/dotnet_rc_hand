@@ -3,17 +3,17 @@ using System.Diagnostics;
 using nanoFramework.Device.Bluetooth.Spp;
 using nanoFramework.Hosting;
 
-namespace RcHand
+namespace RcHand.Hw.Bluetooth
 {
     public class BluetoothService : BackgroundService
     {
         private readonly IBluetoothSpp _spp ;
-        private readonly ICommandLineParser _parser;
-
-        public BluetoothService(ICommandLineParser parser, IBluetoothSpp spp)
+        private readonly IBluetoothMessageHandler _messageHandler;
+        public BluetoothService( IBluetoothSpp spp, IBluetoothMessageHandler messageHandler)
         {
-            _parser = parser;
+
             _spp = spp;
+            _messageHandler = messageHandler;
             _spp.ReceivedData += SppReceivedData;
             _spp.ConnectedEvent += SppConnectedEvent;
         }
@@ -39,10 +39,10 @@ namespace RcHand
             Debug.WriteLine($"Client connected:{sender.IsConnected}");
         }
 
-        private static void SppReceivedData(IBluetoothSpp sender, SppReceivedDataEventArgs readRequestEventArgs)
+        private void SppReceivedData(IBluetoothSpp sender, SppReceivedDataEventArgs readRequestEventArgs)
         {
             var message = readRequestEventArgs.DataString;
-            Debug.WriteLine($"Received=>{message}");
+           _messageHandler.Handle(message);
         }
     }
 }
