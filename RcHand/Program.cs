@@ -1,19 +1,19 @@
-using System;
+using Microsoft.Extensions.Logging;
+using nanoFramework.DependencyInjection;
 using nanoFramework.Hosting;
-using RcHand;
+using nanoFramework.Logging.Debug;
 using RcHand.Infrastructure.Bluetooth;
 using RcHand.Infrastructure.Esp32.JointControllers;
+
+//using RcHand.MessageBus;
 
 var builder = Host.CreateDefaultBuilder()
     .ConfigureServices(services =>
     {
         services
-            .AddBluetooth()
-            .AddThumbFinger(new ServoConfiguration(21))
-            .AddIndexFinger(new ServoConfiguration(22))
-            .AddMiddleFinger(new ServoConfiguration(23))
-            .AddRingFinger(new ServoConfiguration(24))
-            .AddLittleFinger(new ServoConfiguration(25));
+            .AddSingleton(typeof(ILoggerFactory), typeof(DebugLoggerFactory))
+            .AddEsp32Hardware()
+            .AddBluetooth();
     });
 
 var host = builder.Build();

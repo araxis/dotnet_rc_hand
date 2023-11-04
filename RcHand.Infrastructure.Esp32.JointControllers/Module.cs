@@ -1,35 +1,16 @@
 ﻿using nanoFramework.DependencyInjection;
 using RcHand.Application;
-using RcHand.Infrastructure.Esp32.JointControllers.Fingers;
 
 namespace RcHand.Infrastructure.Esp32.JointControllers
 {
     public static class Module
     {
-        public static IServiceCollection AddThumbFinger(this IServiceCollection services,IServoConfiguration configuration)
+        public static IServiceCollection AddEsp32Hardware(this IServiceCollection services)
         {
-            services.AddSingleton(typeof(IThumbFinger),new ThumbFinger(configuration));
-            return services;
-        }
-        public static IServiceCollection AddIndexFinger(this IServiceCollection services,IServoConfiguration configuration)
-        {
-            services.AddSingleton(typeof(IIndexFinger),new IndexFinger(configuration));
-            return services;
-        }
-        public static IServiceCollection AddMiddleFinger(this IServiceCollection services,IServoConfiguration configuration)
-        {
-            services.AddSingleton(typeof(IMiddleFinger),new MiddleFinger(configuration));
-            return services;
-        }
-        public static IServiceCollection AddRingFinger(this IServiceCollection services,IServoConfiguration configuration)
-        {
-            services.AddSingleton(typeof(IRingFinger),new RingFinger(configuration));
-            return services;
-        }
-        public static IServiceCollection AddLittleFinger(this IServiceCollection services,IServoConfiguration configuration)
-        {
-            services.AddSingleton(typeof(ILittleFinger),new LittleFinger(configuration));
-            return services;
+           return services.AddSingleton(typeof(IConfigurationFactory),typeof(ConfigurationFactory))
+                .AddSingleton(typeof(IServoMotorResolver),typeof(ServoMotorResolver))
+                .AddSingleton(typeof(IJointController),typeof(JointController))
+                .AddSingleton(typeof(IDelayHandler),typeof(DelayHandler));
         }
     }
 }

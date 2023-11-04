@@ -1,6 +1,6 @@
 ﻿namespace RcHand.Infrastructure.Bluetooth
 {
-    public interface IBluetoothMessageHandler
+    internal interface IBluetoothMessageHandler
     {
         void Handle(string message);
     }

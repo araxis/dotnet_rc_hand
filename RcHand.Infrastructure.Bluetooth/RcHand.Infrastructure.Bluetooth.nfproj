@@ -23,13 +23,8 @@
     <Compile Include="BluetoothService.cs" />
     <Compile Include="Constants.cs" />
     <Compile Include="IBluetoothMessageHandler.cs" />
-    <Compile Include="IMessageHandler.cs" />
-    <Compile Include="MessageHandlers\MoveLittleFingerMessageHandler.cs" />
-    <Compile Include="MessageHandlers\MoveRingFingerMessageHandler.cs" />
-    <Compile Include="MessageHandlers\MoveMiddleFingerMessageHandler.cs" />
-    <Compile Include="MessageHandlers\MoveIndexFingerMessageHandler.cs" />
-    <Compile Include="MessageHandlers\NotFoundMessagehandler.cs" />
-    <Compile Include="MessageHandlers\MoveThumbFingerMessageHandler.cs" />
+    <Compile Include="IMessageExceptionHandler.cs" />
+    <Compile Include="LogExceptionHandler.cs" />
     <Compile Include="Module.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
@@ -38,13 +33,16 @@
       <HintPath>..\packages\nanoFramework.CoreLibrary.1.14.2\lib\mscorlib.dll</HintPath>
     </Reference>
     <Reference Include="nanoFramework.DependencyInjection">
-      <HintPath>..\packages\nanoFramework.DependencyInjection.1.0.22\lib\nanoFramework.DependencyInjection.dll</HintPath>
+      <HintPath>..\packages\nanoFramework.DependencyInjection.1.0.35\lib\nanoFramework.DependencyInjection.dll</HintPath>
     </Reference>
     <Reference Include="nanoFramework.Device.Bluetooth">
       <HintPath>..\packages\nanoFramework.Device.Bluetooth.1.1.56\lib\nanoFramework.Device.Bluetooth.dll</HintPath>
     </Reference>
     <Reference Include="nanoFramework.Hosting">
       <HintPath>..\packages\nanoFramework.Hosting.1.0.25\lib\nanoFramework.Hosting.dll</HintPath>
+    </Reference>
+    <Reference Include="nanoFramework.Logging">
+      <HintPath>..\packages\nanoFramework.Logging.1.1.63\lib\nanoFramework.Logging.dll</HintPath>
     </Reference>
     <Reference Include="nanoFramework.Runtime.Events">
       <HintPath>..\packages\nanoFramework.Runtime.Events.1.11.6\lib\nanoFramework.Runtime.Events.dll</HintPath>
