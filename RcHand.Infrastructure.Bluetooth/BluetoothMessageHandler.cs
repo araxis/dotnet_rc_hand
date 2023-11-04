@@ -1,47 +1,84 @@
 ﻿
 using System;
-using nanoFramework.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using RcHand.Application;
 
 namespace RcHand.Infrastructure.Bluetooth
 {
-    public class BluetoothMessageHandler : IBluetoothMessageHandler
+    internal class BluetoothMessageHandler : IBluetoothMessageHandler
     {
-        private readonly IMessageHandler[] _handlers;
-        private readonly IServiceProvider _serviceProvider;
-        public BluetoothMessageHandler(IServiceProvider serviceProvider)
+        private readonly IJointController _jointController;
+        private readonly IDelayHandler _delayHandler;
+        private readonly IMessageExceptionHandler _messageExceptionHandler;
+        private readonly ILogger _logger;
+        public BluetoothMessageHandler(IJointController jointController, IDelayHandler delayHandler, IMessageExceptionHandler exceptionHandler, ILoggerFactory loggerFactory)
         {
-            _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
-            _handlers = GetHandlers();
+            _jointController = jointController ?? throw new ArgumentNullException(nameof(jointController));
+            _delayHandler = delayHandler ?? throw new ArgumentNullException(nameof(delayHandler));
+            _messageExceptionHandler = exceptionHandler ?? throw new ArgumentNullException(nameof(exceptionHandler));
+            if(loggerFactory is null) throw new ArgumentNullException(nameof(loggerFactory));
+            _logger = loggerFactory.CreateLogger(nameof(BluetoothMessageHandler));
         }
-
-        public void Handle(string message)
+        public void Handle(string commands)
         {
-            var token = message.Trim();
-            var commandLength = token.Length;
-            if(commandLength ==0) return;
-            for (var i = 0; i < _handlers.Length; i++)
+            var commandList = commands.Trim().Split(Messages.CommandSeparator);
+            foreach (var command in commandList)
             {
-                var handler = _handlers[i];
-                if(handler.Handle(message)) break;
+                try
+                {
+                    if(command.Length<2) continue;
+                    _logger.LogDebug($"Processing command: {command}");
+                    var parts = command.Split(Messages.ParamSeparator);
+                    switch (parts[0])
+                    {
+                        case Messages.MoveCommand:
+                            ExecuteMoveCommand(parts);
+                            break;
+                        case Messages.DelayCommand:
+                            ExecuteDelayCommand(parts);
+                            break;
+                        default:
+                            throw new InvalidOperationException("Invalid command type.");
+                    }
+                    _logger.LogDebug($"Processed command: {command}");
+                }
+                catch (Exception e)
+                {
+                   var handled= _messageExceptionHandler.Handle(e);
+                   if(!handled) return;
+                }
+
             }
-
         }
-
-        private IMessageHandler[] GetHandlers()
+        private void ExecuteMoveCommand(string[] parts)
         {
-            var services =_serviceProvider.GetServices(typeof(IMessageHandler));
-            var count = services.Length;
-            if (count == 0)
-            {
-                return new IMessageHandler[0];
-            }
-            var result = new IMessageHandler[count];
-            for (var i = 0; i < count; i++)
-            {
-                result[i] = (IMessageHandler) services[i];
-            }
-            return result;
-        }
+            if (parts.Length != 3)
+                throw new ArgumentException("Move command must have 2 parameters: joint and degree.");
 
+            if (!int.TryParse(parts[1], out var jointId) || !int.TryParse(parts[2], out var degree))
+                throw new ArgumentException("Parameters for move command must be integers.");
+
+            var joint = GetJointById(jointId);
+            _jointController.Move(joint, degree);
+        }
+        private void ExecuteDelayCommand(string[] parts)
+        {
+            if (parts.Length != 2)
+                throw new ArgumentException("Delay command must have 1 parameter: value in ms.");
+
+            if (!int.TryParse(parts[1], out var delay))
+                throw new ArgumentException("Parameter for delay command must be an integer.");
+
+            _delayHandler.Delay(delay);
+        }
+        private static Joint GetJointById(int jointId) => jointId switch
+        {
+            0 => Joint.Thumb,
+            1 => Joint.Index,
+            2 => Joint.Middle,
+            3 => Joint.Ring,
+            4 => Joint.Little,
+            _ => throw new ArgumentOutOfRangeException(nameof(jointId), "Invalid joint ID.")
+        };
     }
 }
